@@ -81,7 +81,7 @@ try:
                     print(trans_type)
                     trans_found = True 
                     # TODO: Add data to the running list of new payments
-                    
+
             if not trans_found:
                 logger.info("Could not find a transaction type for {0}, let's create one".format(transaction))
                 new_trans_entry = input("Of the following, please type the name of the Transaction Type you would like {0} to be considered as: \n{1}\nEnter Here:".format(transaction, keys_frame))
@@ -93,6 +93,7 @@ try:
                 else:
                     logger.info("Please enter one of the possible types: \n{0}\nEnter Here:".format(keys_frame))
 
-    
+    # TODO Build integration with Google
+    # TODO Build Google Sheets populator
 except Exception as e:
     logger.exception("Encountered an issue: {0}".format(e))
