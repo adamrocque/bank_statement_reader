@@ -80,6 +80,8 @@ try:
                     # print()
                     print(trans_type)
                     trans_found = True 
+                    # TODO: Add data to the running list of new payments
+                    
             if not trans_found:
                 logger.info("Could not find a transaction type for {0}, let's create one".format(transaction))
                 new_trans_entry = input("Of the following, please type the name of the Transaction Type you would like {0} to be considered as: \n{1}\nEnter Here:".format(transaction, keys_frame))
@@ -87,7 +89,7 @@ try:
                     logger.info("Sounds good, I'll create a new entry for {0} in type {1}".format(transaction, new_trans_entry))
                     # TODO: Take  new entry and add it to the current transaction types dict
                     # TODO: Take  new entry and add it to OG transaction types file
-                    # TODO: Add data to the 
+                    # TODO: Add data to the running list of new payments
                 else:
                     logger.info("Please enter one of the possible types: \n{0}\nEnter Here:".format(keys_frame))
 
