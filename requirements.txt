@@ -1,3 +1,5 @@
+# TODO Use command [ pip freeze ] to get an up to date collection of packages being used by a project
+
 ### Requirements without Version Specification ###
 numpy
 pandas
