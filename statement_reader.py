@@ -25,16 +25,18 @@ stream_handler.setFormatter(formatter)
 logger.addHandler(file_handler)
 logger.addHandler(stream_handler)
 
+LIST_DISPLAY_WIDTH = 4
 STATEMENTS_TO_READ_PATH = 'E:\\Repos\\Bank_Statement_Reader\\Statements_ToRead\\'
 STATEMENTS_DONE_PATH = 'E:\\Repos\\Bank_Statement_Reader\\Statements_Read\\'
 TRANS_TYPES_FILE = 'E:\\Repos\\Bank_Statement_Reader\\transaction_types.txt'
+
 
 def key_frame_builder(builder_trans_types):
     # Take the trans type dictionary, rip the keys out and build a slightly prettier format to view all the keys
 
     keys_list = list(builder_trans_types.keys())
     # A variable to allow changes to the width of the frame (in # of elements)
-    frame_width = 4
+    frame_width = LIST_DISPLAY_WIDTH
     keys_breakdown = lambda test_list, frame_width: [keys_list[i:i+frame_width] for i in range(0, len(test_list), frame_width)]
 
     keys_list = keys_breakdown(keys_list, frame_width)  
