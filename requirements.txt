@@ -1,0 +1,8 @@
+### Requirements without Version Specification ###
+numpy
+pandas
+python-dateutil
+pytz
+six
+
+### Requirements with Version Specifiers ###

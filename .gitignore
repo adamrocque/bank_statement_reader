@@ -1,0 +1,27 @@
+# Ignore the node_modules directory
+node_modules/
+
+# Ignore Logs
+logs
+*.log
+Logging/
+
+# Ignore the build directory
+/dist
+
+# Ignore the statements directories
+Statements_Read/
+Statements_ToRead/
+
+# The file containing environment variables and venv folders
+.env
+pyvenv.cfg
+Include/
+Lib/
+Scripts/
+
+
+# Ignore IDE specific files
+.idea/
+.vscode/
+*.sw*
