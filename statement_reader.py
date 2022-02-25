@@ -25,10 +25,12 @@ stream_handler.setFormatter(formatter)
 logger.addHandler(file_handler)
 logger.addHandler(stream_handler)
 
+current_dir = os.getcwd()
+
 LIST_DISPLAY_WIDTH = 4
-STATEMENTS_TO_READ_PATH = 'E:\\Repos\\Bank_Statement_Reader\\Statements_ToRead\\'
-STATEMENTS_DONE_PATH = 'E:\\Repos\\Bank_Statement_Reader\\Statements_Read\\'
-TRANS_TYPES_FILE = 'E:\\Repos\\Bank_Statement_Reader\\transaction_types.txt'
+STATEMENTS_TO_READ_PATH = '{0}\\Statements_ToRead\\'.format(current_dir)
+STATEMENTS_DONE_PATH = '{0}\\Statements_Read\\'.format(current_dir)
+TRANS_TYPES_FILE = '{0}\\bank_statement_reader\\transaction_types.txt'.format(current_dir)
 
 
 def key_frame_builder(builder_trans_types):
@@ -45,12 +47,18 @@ def key_frame_builder(builder_trans_types):
     # logger.debug("The Keys: \n{0}".format(keys_df))
     return keys_df
 
-logger.info("Reading in a types of transactions")
-with open(TRANS_TYPES_FILE) as f:
-    trans_types_src = f.read()
+
+def trans_types_builder(trans_types_source):
+    trans_types = {}
+    for key in trans_types_source:
 
 
 try:
+    logger.info("Reading in a types of transactions")
+    
+    with open(TRANS_TYPES_FILE) as f:
+        trans_types_src = f.read()
+
     trans_types_src = json.loads(trans_types_src)
 
     # Creating a src var for the trans_types dict
@@ -72,7 +80,7 @@ try:
     # for csv in filenames:
     csv = filenames[0]
     df = pd.read_csv(STATEMENTS_TO_READ_PATH + csv, names = ["Date", "TransName", "Debit", "Credit", "CurTot"])
-    for transaction in df['TransName']:
+    for index, transaction in enumerate(df['TransName']):
         if transaction not in ign_list:
             trans_found = False
             for trans_type in trans_types:
@@ -87,6 +95,7 @@ try:
                 new_trans_entry = input("Of the following, please type the name of the Transaction Type you would like {0} to be considered as: \n{1}\nEnter Here:".format(transaction, keys_frame))
                 if new_trans_entry in trans_types.keys():
                     logger.info("Sounds good, I'll create a new entry for {0} in type {1}".format(transaction, new_trans_entry))
+                    trans_types[new_trans_entry][transaction] = df['Debit'][index]
                     # TODO: Take  new entry and add it to the current transaction types dict
                     # TODO: Take  new entry and add it to OG transaction types file
                     # TODO: Add data to the running list of new payments
@@ -97,3 +106,6 @@ try:
     # TODO Build Google Sheets populator
 except Exception as e:
     logger.exception("Encountered an issue: {0}".format(e))
+
+finally:
+    logger.info("Saving any new entries back to the source transactions".format(e))

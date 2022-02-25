@@ -15,7 +15,7 @@
 "Car Fuel" : {},
 "Monthly Subscriptions" : {},
 "Booze" : {},
-"Entertainment" : {"THE MULE":0},
+"Entertainment" : {},
 "Dinner Out" : {},
 "House Purchases" : {},
 "Car Maint" : {},
