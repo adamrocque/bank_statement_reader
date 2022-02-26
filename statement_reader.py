@@ -30,7 +30,7 @@ current_dir = os.getcwd()
 LIST_DISPLAY_WIDTH = 4
 STATEMENTS_TO_READ_PATH = '{0}\\Statements_ToRead\\'.format(current_dir)
 STATEMENTS_DONE_PATH = '{0}\\Statements_Read\\'.format(current_dir)
-TRANS_TYPES_FILE = '{0}\\bank_statement_reader\\transaction_types.txt'.format(current_dir)
+TRANS_TYPES_FILE = '{0}\\transaction_types_old.txt'.format(current_dir)
 
 
 def key_frame_builder(builder_trans_types):
@@ -48,9 +48,9 @@ def key_frame_builder(builder_trans_types):
     return keys_df
 
 
-def trans_types_builder(trans_types_source):
-    trans_types = {}
-    for key in trans_types_source:
+# def trans_types_builder(trans_types_source):
+#     trans_types = {}
+#     for key in trans_types_source:
 
 
 try:
@@ -68,9 +68,6 @@ try:
 
     keys_frame = key_frame_builder(trans_types)
 
-    # Pulling list of types to ignore when parsing
-    ign_list = trans_types['Ignore']
-
     # Get list of files currently in Statements to Read path, and work through each one
     filenames = next(os.walk(STATEMENTS_TO_READ_PATH), (None, None, []))[2]  # [] if no file
 
@@ -81,11 +78,10 @@ try:
     csv = filenames[0]
     df = pd.read_csv(STATEMENTS_TO_READ_PATH + csv, names = ["Date", "TransName", "Debit", "Credit", "CurTot"])
     for index, transaction in enumerate(df['TransName']):
-        if transaction not in ign_list:
+        if transaction not in trans_types['Ignore']:
             trans_found = False
             for trans_type in trans_types:
                 if transaction in trans_types[trans_type]:
-                    # print()
                     print(trans_type)
                     trans_found = True 
                     # TODO: Add data to the running list of new payments
@@ -105,7 +101,8 @@ try:
     # TODO Build integration with Google
     # TODO Build Google Sheets populator
 except Exception as e:
+
     logger.exception("Encountered an issue: {0}".format(e))
 
 finally:
-    logger.info("Saving any new entries back to the source transactions".format(e))
+    logger.info("Saving any new entries back to the source transactions")
