@@ -31,5 +31,5 @@
 "Business" : {},
 "Gifts" : {},
 "Wedding" : {},
-"Ignore" : ["PAYMENT - THANK YOU"]
+"Ignore" : {}
 }
