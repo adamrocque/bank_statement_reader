@@ -30,7 +30,8 @@ current_dir = os.getcwd()
 LIST_DISPLAY_WIDTH = 4
 STATEMENTS_TO_READ_PATH = '{0}\\Statements_ToRead\\'.format(current_dir)
 STATEMENTS_DONE_PATH = '{0}\\Statements_Read\\'.format(current_dir)
-TRANS_TYPES_FILE = '{0}\\transaction_types_old.txt'.format(current_dir)
+# TRANS_TYPES_FILE = '{0}\\transaction_types_old.txt'.format(current_dir)
+TRANS_TYPES_FILE = '{0}\\bank_statement_reader\\transaction_types_old.txt'.format(current_dir)
 
 
 def key_frame_builder(builder_trans_types):
