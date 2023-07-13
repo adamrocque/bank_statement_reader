@@ -1,55 +1,39 @@
 {
-    "Adam Car Payment": [],
-    "Adam RRSP": [
-        "EDWARD JONES AY#001 "
-    ],
-    "Arya": [],
-    "BTC": [
-        "SEND E-TFR ***WgW   ",
-        "SEND E-TFR ***Bsb   "
-    ],
-    "Booze": [],
-    "Business": [],
-    "Car Fuel": [],
-    "Car Maint": [],
-    "Dinner Out": [],
-    "Electricity& Water": [],
-    "Entertainment": [
-        "THE MULE",
-        "SQ *CROWSNEST B   _F"
-    ],
-    "Gas": [],
-    "Gifts": [],
-    "Groceries": [
-        "CAPTL ONE MC X5Y8X9 "
-    ],
-    "Health": [],
-    "Hot Water Heater": [],
-    "House Purchases": [],
-    "Ignore": [
-        "PAYMENT - THANK YOU",
+    "Mortgage":[],
+    "Property Tax":[],
+    "Electricity & Water":[],
+    "Gas":[],
+    "Hot Water Heater":[],
+    "Internet":[],
+    "Insurance ( Car/House)":["BELAIR INS/ASS.  INS"],
+    "Phone":[],
+    "Sarah Car Payment":[],
+    "Adam Car Payment":[],
+    "Monthly Subscriptions":[],
+    "Groceries":["CAPTL ONE MC X5Y8X9 "],
+    "Car Fuel":[],
+    "Dine Out":[],
+    "Entertainment":["THE MULE",
+        "SQ *CROWSNEST B   _F"],
+    "Booze":[],
+    "Personal Purchases":[],
+    "Car Maint":[],
+    "House":[],
+    "Health Savings":[],
+    "Trips":[],
+    "Arya":[],
+    "Raj Savings":[],
+    "RRSP Sarah":[],
+    "RRSP Adam":["EDWARD JONES AY#001 ",],
+    "Stocks":[],
+    "BTC":[],
+    "Aevi":[],
+    "Gifts":[],
+    "Wedding":[],
+    "Savings":[        "SSV TO:  05366534547",
+        "PTS TO:  05366534547"],
+    "Ignore":["PAYMENT - THANK YOU",
         "MONTHLY ACCOUNT FEE ",
         "ACCT BAL REBATE     ",
-        "WL511 TFR-TO C/C    "
-    ],
-    "Income": [],
-    "Insurance": [
-        "BELAIR INS/ASS.  INS"
-    ],
-    "Internet": [],
-    "Monthly Subscriptions": [],
-    "Mortgage ": [],
-    "Personal": [],
-    "Phone": [],
-    "Property Tax": [],
-    "Raj Shared": [],
-    "Sarah Car Payment": [],
-    "Sarah RRSP": [],
-    "Savings": [
-        "SSV TO:  05366534547",
-        "PTS TO:  05366534547"
-    ],
-    "Stock": [],
-    "Travel": [],
-    "Wedding": []
+        "WL511 TFR-TO C/C    "]
 }
