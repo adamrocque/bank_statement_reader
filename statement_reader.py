@@ -10,8 +10,14 @@ import sys
 
 # Check if the logging directory exists, create if not
 if not os.path.isdir('Logging/statement_reader/'):
-    os.mkdir('Logging/')
-    os.mkdir('Logging/statement_reader/')
+    try:
+        os.mkdir('Logging/')
+    except:
+        pass
+    try:
+        os.mkdir('Logging/statement_reader/')
+    except:
+        pass
 
 # Creating the logger
 logger = logging.getLogger('[Bank Statement Ready]')
@@ -31,12 +37,46 @@ logger.addHandler(stream_handler)
 current_dir = os.getcwd()
 
 LIST_DISPLAY_WIDTH = 4
-STATEMENTS_TO_READ_PATH = '{0}\\Statements_ToRead\\'.format(current_dir)
-STATEMENTS_DONE_PATH = '{0}\\Statements_Read\\'.format(current_dir)
-# TRANS_TYPES_FILE = '{0}\\transaction_types_old.txt'.format(current_dir)
-TRANS_TYPES_FILE = '{0}\\bank_statement_reader\\transaction_types_old.txt'.format(current_dir)
-TRANS_STORED_FILE = '{0}\\bank_statement_reader\\transaction_stored.txt'.format(current_dir)
-CSV_DATA_FILE = '{0}\\all_data.csv'.format(current_dir)
+STATEMENTS_TO_READ_PATH = f'{current_dir}\\Statements_ToRead\\'
+STATEMENTS_DONE_PATH = f'{current_dir}\\Statements_Read\\'
+TRANS_AMOUNTS_TEMPLATE = f'{current_dir}\\transaction_amounts_template.json'
+TRANS_TYPES_FILE = f'{current_dir}\\transaction_types.json'
+CSV_DATA_FILE = f'{current_dir}\\all_data.csv'
+PROCESSED_CCS = f'{current_dir}\\CC_Outputs\\processed_statements.json'
+
+
+"""
+    A function to update the running list of transaction types JSON file with new entries
+
+    Args:
+    trans_dict: {string}            Dict of the various transaction types already stored
+    list_of_transactions: {list}    List of the various transaction types
+    type_num: {int}                 The index of the transaction type that the new entry belongs to
+    transaction_name: {string}      The name of the new transaction that needs to be added to the list
+
+
+    Returns: 
+    trans_dict: {string}            Dict of the various transaction types already stored, with the new entry added
+"""  
+def add_new_trans_type(trans_dict, list_of_transactions, type_num, transaction_name):
+    trans_dict[list_of_transactions[type_num]].append(transaction_name)
+    return trans_dict
+
+
+def add_transaction_amount(transaction_month, transaction_amounts_dict, transaction_type, debit_amount, credit_amount):
+    # if Debit is NaN, means that the transaction was a Credit, 
+    # so we should subtract the total in the Credit Column (or add the negative) 
+    if pd.isna(debit_amt):
+        transaction_amount = 0 - float(credit_amt)
+    else:
+        transaction_amount = float(debit_amt)
+
+    if transaction_month in transaction_amounts_dict[found_trans_type]:
+        transaction_amounts_dict[transaction_type][transaction_month] = transaction_amounts_dict[found_trans_type][trans_month] + transaction_amount
+    else:
+        transaction_amounts_dict[transaction_type][transaction_month] = transaction_amount
+
+    return transaction_amounts_dict
 
 
 """
@@ -51,7 +91,7 @@ CSV_DATA_FILE = '{0}\\all_data.csv'.format(current_dir)
 def month_finder(mf_transaction_date):
     mf_full_date = dparser.parse(mf_transaction_date)
     month_shortform = datetime.datetime.strftime(mf_full_date, "%b")
-    logger.debug("Found month {0} from data {1}".format(month_shortform, mf_transaction_date))
+    logger.debug(f"Found month {month_shortform} from data {mf_transaction_date}")
     return month_shortform
 
 
@@ -67,42 +107,36 @@ def month_finder(mf_transaction_date):
 """  
 def key_frame_builder(keys_list):
     # Take the trans type dictionary, rip the keys out and build a slightly prettier format to view all the keys
-    keys_list = ['{0}. {1}'.format(key_index, keys) for key_index, keys in enumerate(keys_list)]
+    keys_list = [f'{key_index}. {keys}' for key_index, keys in enumerate(keys_list)]
     # A variable to allow changes to the width of the frame (in # of elements)
     keys_breakdown = lambda input_list, frame_width: [input_list[i:i+frame_width] for i in range(0, len(input_list), frame_width)]
 
     keys_list = keys_breakdown(keys_list, LIST_DISPLAY_WIDTH)  
     keys_df = pd.DataFrame(keys_list).to_string(index = False, header = False)
     
-    # logger.debug("The Keys: \n{0}".format(keys_df))
+    # logger.debug(f"The Keys: \n{keys_df}")
     return keys_df
 
 
-# def trans_types_builder(trans_types_source):
-#     trans_types = {}
-#     for key in trans_types_source:
-
 
 try:
-    logger.info("Reading in a types of transactions")
+    logger.info("Reading in all types of transactions")
     
-    csv_file = open(CSV_DATA_FILE, 'w')
-    csv_writer = csv.writer(csv_file)
-
-    with open(TRANS_STORED_FILE) as tsf:
-        trans_stored_src = tsf.read()
+    # TRANS_TYPES_FILE = transaction_types.json
+    with open(TRANS_TYPES_FILE) as types_f: 
+        trans_types_src = types_f.read()
     
-    trans_stored_src = json.loads(trans_stored_src)
+    trans_types = json.loads(trans_types_src)
+    logger.info(f"Types of Transactions: {trans_types}")
 
-    with open(TRANS_TYPES_FILE) as f:
-        trans_types_src = f.read()
+    trans_amt_template = dict(trans_types)
+    for element in trans_amt_template:
+        trans_amt_template[element] = {}
 
-    trans_types_src = json.loads(trans_types_src)
-
+        
     # Creating a src var for the trans_types dict
     # This will only be changed to add new listings to each corresponding type, 
     # as we find listings that are not accounted for 
-    trans_types = trans_types_src
     trans_list = list(trans_types.keys())
 
     keys_frame = key_frame_builder(trans_list)
@@ -110,55 +144,59 @@ try:
     # Get list of files currently in Statements to Read path, and work through each one
     filenames = next(os.walk(STATEMENTS_TO_READ_PATH), (None, None, []))[2]  # [] if no file
 
-    # for csv in filenames:
-    csv = filenames[0]
-    df = pd.read_csv(STATEMENTS_TO_READ_PATH + csv, names = ["Date", "TransName", "Debit", "Credit", "CurTot"])
-    for index, transaction in enumerate(df['TransName']):
-        trans_month = month_finder(df["Date"][index])
-        logger.info("\nTransaction: {0}\nDebit: {1}\nCredit: {2}".format(transaction, df["Debit"][index],df["Credit"][index]))
-        # Logic if the transaction is known
-        if any(transaction in val for val in trans_stored_src.values()):
-            found_trans_type = [key for key, value in trans_stored_src.items() if transaction in value][0]
-            logger.info("Found transaction {0} as type {1}".format(transaction, found_trans_type))
-            if trans_month in trans_types[found_trans_type]:
-                trans_types[found_trans_type][trans_month] = trans_types[found_trans_type][trans_month] + float(df["Debit"][index])
-            else:
-                trans_types[found_trans_type][trans_month] = float(df["Debit"][index])
+    month_transaction_amounts = trans_amt_template
+    for csv in filenames:
+        # csv = filenames
+        logger.info(f"WorkingFile: {csv}")
+        statement_df = pd.read_csv(STATEMENTS_TO_READ_PATH + csv, names = ["Date", "TransName", "Debit", "Credit", "CurTot"])
+        logger.info(f"Reading in the csv file:\n{statement_df}")
 
-        else:
-            # Logic if the transaction isn't currently known
-            trans_type_num = int(input("\n{0}\nEnter Trans Type Number:".format(keys_frame)))
-            if trans_type_num <= len(trans_list)-1:
-                logger.info("Sounds good, I'll create a new entry for {0} in type {1} for {2}".format(transaction, trans_list[trans_type_num],trans_month))
-                trans_stored_src[trans_list[trans_type_num]].append(transaction)
-                if trans_month in trans_types[trans_list[trans_type_num]]:
-                    trans_types[trans_list[trans_type_num]][trans_month] = trans_types[trans_list[trans_type_num]][trans_month] + float(df["Debit"][index])
+        # Loop through each transaction in the statement
+        
+        for index, transaction in enumerate(statement_df['TransName']):
+            trans_month = month_finder(statement_df["Date"][index])
+            debit_amt = statement_df["Debit"][index]
+            credit_amt = statement_df["Credit"][index]
+
+            logger.info(f"\nTransaction: {transaction}\nDebit: {debit_amt}\nCredit: {credit_amt}\nMonth:{trans_month}")
+            
+            # Logic if the transaction is known
+            if any(transaction in val for val in trans_types.values()):
+                found_trans_type = [key for key, value in trans_types.items() if transaction in value][0]
+                logger.info(f"Found transaction {transaction} as type {found_trans_type}")
+
+                month_transaction_amounts = add_transaction_amount(trans_month, month_transaction_amounts, found_trans_type, debit_amt, credit_amt)
+            
+            else:
+                # Logic if the transaction isn't currently known
+                trans_type_num = int(input(f"\n{keys_frame}\nEnter Trans Type Number:"))
+                if trans_type_num <= len(trans_list)-1:
+                    logger.info(f"Sounds good, I'll create a new entry for {transaction} in type {trans_list[trans_type_num]} for {trans_month}")                
+                    trans_types[trans_list[trans_type_num]].append(transaction)
+                    found_trans_type = trans_list[trans_type_num]
+
+                    month_transaction_amounts = add_transaction_amount(trans_month, month_transaction_amounts, trans_list[trans_type_num], debit_amt, credit_amt)
+                    
                 else:
-                    trans_types[trans_list[trans_type_num]][trans_month] = float(df["Debit"][index])
-            else:
-                raise ValueError("The number you entered doesn't correspond to a possible entry. Goodbye ")
+                    raise ValueError("The number you entered doesn't correspond to a possible entry. Goodbye ")
 
-
-    # Old logic TODO to save the transaction within the trans_types dict.
-    # TODO: Build logic to save trans name against trans type in file for future ref
-    # TODO: Build logic to determine if transaction is in previous file to auto fill transType
-    # TODO: Add data to the running list of new payments
-    # TODO: Take  new entry and add it to the current transaction types dict
-    # TODO: Take  new entry and add it to OG transaction types file
-    # TODO: Add data to the running list of new payments
-
-    # TODO Build integration with Google
-    # TODO Build Google Sheets populator
+        # TODO Build integration with Google
+        # TODO Build Google Sheets populator
 except Exception as e:
 
-    logger.exception("Encountered an issue: {0}".format(e))
+    logger.exception(f"Encountered an issue: {e}")
 
 finally:
-    logger.info("Closing the csv file {0}".format(CSV_DATA_FILE))
-    csv_file.close()
+    
+    logger.info(f"Writing changes to transaction types file {TRANS_TYPES_FILE}")
+    logger.info(f"The changes: \n{trans_types}")
+    with open(TRANS_TYPES_FILE, 'wt') as tsf_final:
 
-    logger.info("Writing changes to stored transactions file {0}".format(TRANS_STORED_FILE))
-    with open(TRANS_STORED_FILE, 'wt') as tsf_final:
-        tsf_final.write(json.dumps(trans_stored_src, indent=4, sort_keys=True))
+        tsf_final.write(json.dumps(trans_types, indent=4, sort_keys=True))
         # pprint.pprint(trans_stored_src, stream=tsf_final)
+    
+    now_time = datetime.datetime.now().strftime("%y-%m-%d_%H-%M-%S")
+    with open(f"CC_Outputs\\processed_statements_{now_time}.json", 'wt') as processed_f:
+        processed_f.write(json.dumps(month_transaction_amounts, indent=4, sort_keys=True))        
+
     logger.info("Saving any new entries back to the source transactions")
