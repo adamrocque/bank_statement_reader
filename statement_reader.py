@@ -42,7 +42,7 @@ STATEMENTS_DONE_PATH = f'{current_dir}\\Statements_Read\\'
 TRANS_AMOUNTS_TEMPLATE = f'{current_dir}\\transaction_amounts_template.json'
 TRANS_TYPES_FILE = f'{current_dir}\\transaction_types.json'
 CSV_DATA_FILE = f'{current_dir}\\all_data.csv'
-PROCESSED_CCS = f'{current_dir}\\CC_Outputs\\processed_statements.json'
+PROCESSED_CCS = f'{current_dir}\\CC_Outputs\\processed_statements_clean.json'
 
 
 """
