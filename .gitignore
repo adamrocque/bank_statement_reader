@@ -10,8 +10,8 @@ Logging/
 /dist
 
 # Ignore the statements directories
-Statements_Read/
-Statements_ToRead/
+InputFiles/
+OutputFiles/
 
 # The file containing environment variables and venv folders
 .env
